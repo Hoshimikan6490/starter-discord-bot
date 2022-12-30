@@ -1,24 +1,3 @@
-const express = require('express')
-const mongoose = require('mongoose')
-
-
-//機密情報取得
-const token = process.env["bot_token"];
-const mong_db_info = process.env["mongodb_token"];
-
-const app = express()
-const PORT = process.env.PORT || 3000
-
-const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(mongodb_token);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.log(error);
-    process.exit(1);
-  }
-}
-
 const fs = require("fs");
 // Discord bot implements
 const {
@@ -41,13 +20,16 @@ const client = new Client({
 module.exports.client = client;
 const cron = require("node-cron");
 const { formatToTimeZone } = require("date-fns-timezone");
+const mongoose = require("mongoose");
 const profileModel = require("./models/profileSchema");
 const prefix = "mc!";
 const util = require("util");
 const wait = util.promisify(setTimeout);
 
-//Routes go here
-app.all('*', (req,res) => {
+//機密情報取得
+const token = process.env["bot_token"];
+const mong_db_info = process.env["mongodb_token"];
+
 const commands = {};
 const commandFiles = fs
   .readdirSync("./commands")
@@ -193,8 +175,19 @@ client.once("ready", async () => {
 
   client.channels.cache
     .get("889486664760721418")
-    .send("cyclicで起動しました！");
+    .send("replitで起動しました！");
 });
+
+mongoose //mongooseについて
+  .connect(mong_db_info, {
+    useNewUrlParser: true, //任意
+  })
+  .then(() => {
+    console.log("データベースに接続したんだゾ");
+  })
+  .catch((error) => {
+    console.log(error); //エラー出力
+  });
 
 //　ユーザー参加時の処理
 client.on("guildMemberAdd", async (member) => {
@@ -615,11 +608,3 @@ client.on("interactionCreate", async (interaction) => {
 
 //Discordへの接続
 client.login(token);
-})
-
-//Connect to the database before listening
-connectDB().then(() => {
-    app.listen(PORT, () => {
-        console.log("listening for requests");
-    })
-})
