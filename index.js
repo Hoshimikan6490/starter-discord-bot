@@ -1,3 +1,6 @@
+const express = require('express')
+const app = express()
+
 const fs = require("fs");
 // Discord bot implements
 const {
@@ -29,6 +32,21 @@ const wait = util.promisify(setTimeout);
 //機密情報取得
 const token = process.env["bot_token"];
 const mong_db_info = process.env["mongodb_token"];
+
+mongoose //mongooseについて
+  .connect(mong_db_info, {
+    useNewUrlParser: true, //任意
+  })
+  .then(() => {
+    console.log("データベースに接続したんだゾ");
+  })
+  .catch((error) => {
+    console.log(error); //エラー出力
+  });
+
+app.all('*', (req,res) => {
+    res.json({"every thing":"is awesome"})
+})
 
 const commands = {};
 const commandFiles = fs
@@ -177,17 +195,6 @@ client.once("ready", async () => {
     .get("889486664760721418")
     .send("replitで起動しました！");
 });
-
-mongoose //mongooseについて
-  .connect(mong_db_info, {
-    useNewUrlParser: true, //任意
-  })
-  .then(() => {
-    console.log("データベースに接続したんだゾ");
-  })
-  .catch((error) => {
-    console.log(error); //エラー出力
-  });
 
 //　ユーザー参加時の処理
 client.on("guildMemberAdd", async (member) => {
